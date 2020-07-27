@@ -32,9 +32,8 @@ func GetOne(id int) (*Book, error) {
 
 }
 
-func Store(book Book) error {
+func Store(book Book) {
 	books = append(books, book)
-	return nil
 }
 
 func Delete(id int) error {
