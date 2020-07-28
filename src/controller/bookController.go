@@ -56,9 +56,9 @@ func Store(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(&errorDefault)
 		return
 	}
-	b.Store(book)
+	bookCreated := b.Store(book)
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(&book)
+	json.NewEncoder(w).Encode(bookCreated)
 
 }
 

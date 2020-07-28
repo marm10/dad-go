@@ -14,7 +14,7 @@ type Book struct {
 
 type Books []Book
 
-var books Books
+var books = Books{}
 
 func GetAll() Books {
 	return books
@@ -32,8 +32,10 @@ func GetOne(id int) (*Book, error) {
 
 }
 
-func Store(book Book) {
+func Store(book Book) *Book {
+	book.Id = len(books) + 1
 	books = append(books, book)
+	return &book
 }
 
 func Delete(id int) error {
