@@ -16,6 +16,6 @@ func main() {
 		AllowedMethods: []string{"POST", "GET", "DELETE", "PUT", "PATCH"},
 	})
 	handler := c.Handler(mux)
-	fmt.Println("Server running on 8080 port ... ")
-	log.Fatal(http.ListenAndServe(":8080", handler))
+	fmt.Println("Server running on 80 port ... ")
+	log.Fatal(http.ListenAndServe(":80", handler))
 }
