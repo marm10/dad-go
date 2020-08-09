@@ -15,7 +15,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	books := b.GetAll()
 	if err := json.NewEncoder(w).Encode(&books); err != nil {
-		h.Handler(w, r, http.StatusNotFound, err.Error())
+		h.Handler(w, r, http.StatusInternalServerError, err.Error())
 	}
 }
 
@@ -42,7 +42,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&book); err != nil {
-		h.Handler(w, r, http.StatusNotFound, err.Error())
+		h.Handler(w, r, http.StatusBadRequest, err.Error())
 		return
 	}
 	bookCreated := b.Store(book)
