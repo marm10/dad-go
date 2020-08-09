@@ -15,45 +15,34 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	books := b.GetAll()
 	if err := json.NewEncoder(w).Encode(&books); err != nil {
-		errorDefault := h.DefaultError{
-			StatusCode: http.StatusNotFound,
-			Message:    err.Error(),
-		}
-		json.NewEncoder(w).Encode(&errorDefault)
+		h.Handler(w, r, http.StatusNotFound, err.Error())
 	}
 }
 
 func GetOne(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json")
 	att := mux.Vars(r)
 	idAtt := att["id"]
 	id, _ := strconv.Atoi(idAtt)
 	book, err := b.GetOne(id)
 	if err != nil {
-		errorDefault := h.DefaultError{
-			StatusCode: http.StatusNotFound,
-			Message:    err.Error(),
-		}
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(&errorDefault)
-	} else {
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(&book)
+		h.Handler(w, r, http.StatusNotFound, err.Error())
+		return
 	}
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(&book)
+
 }
 
 func Store(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json")
 	var book b.Book
 	decoder := json.NewDecoder(r.Body)
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(&book); err != nil {
-		errorDefault := h.DefaultError{
-			StatusCode: http.StatusBadRequest,
-			Message:    err.Error(),
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode(&errorDefault)
+		h.Handler(w, r, http.StatusNotFound, err.Error())
 		return
 	}
 	bookCreated := b.Store(book)
@@ -63,19 +52,16 @@ func Store(w http.ResponseWriter, r *http.Request) {
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
+
 	w.Header().Set("Content-Type", "application/json")
 	att := mux.Vars(r)
 	idAtt := att["id"]
 	id, _ := strconv.Atoi(idAtt)
 	err := b.Delete(id)
 	if err != nil {
-		errorDefault := h.DefaultError{
-			StatusCode: http.StatusNotFound,
-			Message:    err.Error(),
-		}
-		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(&errorDefault)
-	} else {
-		w.WriteHeader(http.StatusAccepted)
+		h.Handler(w, r, http.StatusNotFound, err.Error())
+		return
 	}
+	w.WriteHeader(http.StatusAccepted)
+
 }
