@@ -74,7 +74,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	})
 	
 	if err1 != nil {
-		panic(err)
+		panic(err1)
 	}
 	
 	defer f.Close()
@@ -101,12 +101,16 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	br := bytes.NewReader(b)
 
 	w.WriteHeader(http.StatusCreated)
-	_, _ := svc.PutObject(&s3.PutObjectInput{
+	_, err2 := svc.PutObject(&s3.PutObjectInput{
 		Body: br,
 		Bucket: aws.String(BUCKET_NAME),
 		Key: aws.String("book_"+name+".json"),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
 	})
+
+	if err2 != nil {
+		panic(err2)
+	}
 
 	json.NewEncoder(w).Encode(bookCreated)
 
