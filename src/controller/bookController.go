@@ -78,8 +78,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 func CreateBucket(w http.ResponseWriter, r *http.Request) () {
 	w.Header().Set("Content-Type", "application/json")
 
-	att := mux.Vars(r)
-	name := att["name"]
 	// snippet-start:[s3.go.create_bucket.call]
     svc := s3.New(session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(REGION),
