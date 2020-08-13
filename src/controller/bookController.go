@@ -109,7 +109,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	br := bytes.NewReader(b)
 
 	w.WriteHeader(http.StatusCreated)
-	_, err2 := ss3session.PutObject(&s3.PutObjectInput{
+	_, err2 := s3session.PutObject(&s3.PutObjectInput{
 		Body: br,
 		Bucket: aws.String(bucket_name),
 		Key: aws.String(folderName+"book.json"),
