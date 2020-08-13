@@ -10,9 +10,8 @@ import (
 	h "ufc.com/deti/go-dad/src/handlerException"
 	b "ufc.com/deti/go-dad/src/model"	
 
-	"github.com/aws/aws-sdk-go/aws"
-    "github.com/aws/aws-sdk-go/aws/session"
-    "github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 const (
@@ -87,32 +86,28 @@ func CreateBucket(w http.ResponseWriter, r *http.Request) () {
 	name := att["name"]
 	name, _ := strconv.Atoi(name)
 
-	InitS3();
-	resp, err := s3session.ListBuckets(&s3.ListBucketsInput{
-		Bucket: aws.String(name),
-		CreateBucketConfiguration: &s3.CreateBucketConfiguration{
-			LocationConstraint: aws.String(REGION),
-		},
-	})
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
-			switch aerr.Code() {
-			case s3.ErrCodeBucketAlreadyExists:
-				fmt.Println("Bucket name already in use!")
-				panic(err)
-			case s3.ErrCodeBucketAlreadyOwnedByYou:
-				fmt.Println("Bucket exists and is owned by you!")
-			default:
-				panic(err)
-			}
-		}
-	}
-
-	w.WriteHeader(http.StatusAccepted)	
-}
-
-func InitS3() {
-	s3session = s3.New(session.Must(session.NewSession(&aws.Config{
+	// snippet-start:[s3.go.create_bucket.call]
+    svc := s3.New(session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(REGION)
 	})))
+
+    _, err := svc.CreateBucket(&s3.CreateBucketInput{
+        Bucket: name,
+    })
+    // snippet-end:[s3.go.create_bucket.call]
+    if err != nil {
+        return err
+    }
+
+    // snippet-start:[s3.go.create_bucket.wait]
+    err = svc.WaitUntilBucketExists(&s3.HeadBucketInput{
+        Bucket: name,
+    })
+    // snippet-end:[s3.go.create_bucket.wait]
+    if err != nil {
+        return err
+    }
+
+
+	w.WriteHeader(http.StatusAccepted)	
 }
