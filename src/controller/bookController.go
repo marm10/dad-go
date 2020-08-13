@@ -49,8 +49,8 @@ func GetOne(w http.ResponseWriter, r *http.Request) {
 
 func Store(w http.ResponseWriter, r *http.Request) {
 
-	file, handler, err := r.FormFile("file")
-	fileName := r.FormValue("file_name")
+	file, handler, err := r.FormFile("cover")
+	fileName := r.FormValue("cover_name")
     if err != nil {
         panic(err)
 	}
@@ -61,9 +61,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         panic(err)
 	}
-
 	
-
 	w.Header().Set("Content-Type", "application/json")
 	var book b.Book
 	name := r.FormValue("nome")
@@ -78,17 +76,20 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	book.Authors = authors
 	book.Year = year
 	book.Preco = price
+	book.Cover = fileName;
 
 	bookCreated := b.Store(book)
+
+	folderName := "book_"+name+"/";
 
 	svc := s3.New(session.Must(session.NewSession(&aws.Config{
 		Region: aws.String(REGION),
 	})))
 
 	_, err1 := svc.PutObject(&s3.PutObjectInput{
-		Body: "book_"+name+"/"+file,
+		Body: file,
 		Bucket: aws.String(BUCKET_NAME),
-		Key: aws.String(fileName),
+		Key: aws.String(folderName+fileName),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
 	})
 	
@@ -106,7 +107,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	_, err2 := svc.PutObject(&s3.PutObjectInput{
 		Body: br,
 		Bucket: aws.String(BUCKET_NAME),
-		Key: aws.String("book_"+name+"/book.json"),
+		Key: aws.String(folderName+"book.json"),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
 	})
 
@@ -130,7 +131,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusAccepted)
-
 }
 
 func CreateBucket(w http.ResponseWriter, r *http.Request) () {
