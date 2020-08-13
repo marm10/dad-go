@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 	h "ufc.com/deti/go-dad/src/handlerException"
@@ -95,24 +96,6 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	bookCreated := b.Store(book)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(bookCreated)
-
-}
-
-func UploadObject(File f, string filename) {
-	svc := s3.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-
-	_, err := svc.PutObject(&s3.PutObjectInput{
-		Body: f,
-		Bucket: aws.String(BUCKET_NAME),
-		Key: aws.String(filename),
-		ACL: aws.String(s3.BucketCannedACLPublicRead),
-	})
-	
-	if err != nil {
-		panic(err)
-	}
 
 }
 
