@@ -79,10 +79,18 @@ func Store(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	var book b.Book
-	book.Name := r.FormValue("nome")
-	book.Authors := r.FormValue("autores")
-	book.Year := r.FormValue("data_lancamento")
-	book.Preco := r.FormValue("preco")
+	name := r.FormValue("nome")
+	authorsAttr := r.FormValue("autores")
+	year := r.FormValue("data_lancamento")
+	priceAttr := r.FormValue("preco")
+
+	price =: strconv.ParseFloat(priceAttr, 64)
+	authors := strings.Split(authorsAttr, ",")
+
+	book.Name = name
+	book.Authors = authors
+	book.Year = year
+	book.Preco = price
 
 	bookCreated := b.Store(book)
 	w.WriteHeader(http.StatusCreated)
