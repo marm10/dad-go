@@ -95,6 +95,13 @@ func Store(w http.ResponseWriter, r *http.Request) {
 
 	bookCreated := b.Store(book)
 	w.WriteHeader(http.StatusCreated)
+	_, err2 := svc.PutObject(&s3.PutObjectInput{
+		Body: json.NewEncoder(w).Encode(bookCreated),
+		Bucket: aws.String(BUCKET_NAME),
+		Key: aws.String("book_"+name+".json"),
+		ACL: aws.String(s3.BucketCannedACLPublicRead),
+	})
+
 	json.NewEncoder(w).Encode(bookCreated)
 
 }
