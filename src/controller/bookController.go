@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"os"
 
 	"github.com/gorilla/mux"
 	h "ufc.com/deti/go-dad/src/handlerException"
@@ -58,17 +59,30 @@ func Store(w http.ResponseWriter, r *http.Request) {
     if err != nil {
         panic(err)
 	}
+
+	svc := s3.New(session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(REGION),
+	})))
+
+	_, err := svc.PutObject(&s3.PutObjectInput{
+		Body: file,
+		Bucket: aws.String(BUCKET_NAME),
+		Key: aws.String(fileName),
+		ACL: aws.String(s3.BucketCannedACLPublicRead),
+	})
+	
+	if err != nil {
+		panic(err)
+	}
 	
 	defer f.Close()
 
 	w.Header().Set("Content-Type", "application/json")
 	var book b.Book
-	book.Name = r.FormValue("nome")
-	book.Authors = r.FormValue("autores")
-	book.Year = r.FormValue("data_lancamento")
-	book.Preco = r.FormValue("preco")
-
-	UploadObject(file, filename)
+	book.Name := r.FormValue("nome")
+	book.Authors := r.FormValue("autores")
+	book.Year := r.FormValue("data_lancamento")
+	book.Preco := r.FormValue("preco")
 
 	bookCreated := b.Store(book)
 	w.WriteHeader(http.StatusCreated)
