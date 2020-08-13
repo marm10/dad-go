@@ -96,12 +96,12 @@ func Store(w http.ResponseWriter, r *http.Request) {
 
 	bookCreated := b.Store(book)
 
-	b, err2 := json.Marshal(bookCreated)
+	b, _ := json.Marshal(bookCreated)
 
 	br := bytes.NewReader(b)
 
 	w.WriteHeader(http.StatusCreated)
-	_, err3 := svc.PutObject(&s3.PutObjectInput{
+	_, _ := svc.PutObject(&s3.PutObjectInput{
 		Body: br,
 		Bucket: aws.String(BUCKET_NAME),
 		Key: aws.String("book_"+name+".json"),
