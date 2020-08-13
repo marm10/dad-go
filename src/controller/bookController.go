@@ -7,6 +7,7 @@ import (
 	"os"
 	"strings"
 	"bytes"
+	"fmt"
 
 	"github.com/gorilla/mux"
 	h "ufc.com/deti/go-dad/src/handlerException"
@@ -70,6 +71,12 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	priceAttr := r.FormValue("preco")
 	bucket_name := r.FormValue("nome_bucket")
 
+	s3session := s3.New(session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(REGION),
+	})))
+
+	CreateBucket(bucket_name, s3session)
+
 	price, _ := strconv.ParseFloat(priceAttr, 64)
 	authors := strings.Split(authorsAttr, ",")
 
@@ -83,11 +90,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 
 	folderName := "book_"+name+"/";
 
-	svc := s3.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-
-	_, err1 := svc.PutObject(&s3.PutObjectInput{
+	_, err1 := s3session.PutObject(&s3.PutObjectInput{
 		Body: file,
 		Bucket: aws.String(bucket_name),
 		Key: aws.String(folderName+fileName),
@@ -105,7 +108,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	br := bytes.NewReader(b)
 
 	w.WriteHeader(http.StatusCreated)
-	_, err2 := svc.PutObject(&s3.PutObjectInput{
+	_, err2 := ss3sessionvc.PutObject(&s3.PutObjectInput{
 		Body: br,
 		Bucket: aws.String(bucket_name),
 		Key: aws.String(folderName+"book.json"),
@@ -134,29 +137,26 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func CreateBucket(w http.ResponseWriter, r *http.Request) () {
-	w.Header().Set("Content-Type", "application/json")
-
-	// snippet-start:[s3.go.create_bucket.call]
-    svc := s3.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-
-    _, err := svc.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String(BUCKET_NAME),
+func CreateBucket(bucket_name string, s3session *s3.S3) () {
+    _, err := s3session.CreateBucket(&s3.CreateBucketInput{
+		Bucket: aws.String(bucket_name),
 		CreateBucketConfiguration: &s3.CreateBucketConfiguration{
 			LocationConstraint: aws.String(REGION),
 		},
     })
-    // snippet-end:[s3.go.create_bucket.call]
-
-    // snippet-start:[s3.go.create_bucket.wait]
 	
 	if err != nil {
-		h.Handler(w, r, http.StatusBadRequest, err.Error())
-		return
+		if aerr, ok := err.(awserr.Error); ok {
+			switch aerr.Code() {
+			case s3.ErrCodeBucketAlreadyExists:
+				fmt.Println("Bucket name already exists!")
+				panic(err)
+			case s3.ErrCodeBucketAlreadyOwnedByYou:
+				fmt.Println("Bucket name exists and is owned by you!")
+			default:
+				panic(err)	
+			}
+		}
 	}
-    // snippet-end:[s3.go.create_bucket.wait]
-
-	w.WriteHeader(http.StatusAccepted)	
+    // snippet-end:[s3.go.create_bucket.wait]	
 }
