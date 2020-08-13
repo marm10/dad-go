@@ -19,10 +19,6 @@ const (
 	REGION = "us-east-2"
 )
 
-var (
-	s3session *s3.s3
-)
-
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
@@ -83,8 +79,8 @@ func CreateBucket(w http.ResponseWriter, r *http.Request) () {
 	w.Header().Set("Content-Type", "application/json")
 
 	att := mux.Vars(r)
-	name := att["name"]
-	name, _ := strconv.Atoi(name)
+	nameAtt := att["name"]
+	name, _ := strconv.Atoi(nameAtt)
 
 	// snippet-start:[s3.go.create_bucket.call]
     svc := s3.New(session.Must(session.NewSession(&aws.Config{
@@ -95,19 +91,12 @@ func CreateBucket(w http.ResponseWriter, r *http.Request) () {
         Bucket: name,
     })
     // snippet-end:[s3.go.create_bucket.call]
-    if err != nil {
-        return err
-    }
 
     // snippet-start:[s3.go.create_bucket.wait]
     err = svc.WaitUntilBucketExists(&s3.HeadBucketInput{
         Bucket: name,
     })
     // snippet-end:[s3.go.create_bucket.wait]
-    if err != nil {
-        return err
-    }
-
 
 	w.WriteHeader(http.StatusAccepted)	
 }
