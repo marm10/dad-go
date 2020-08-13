@@ -87,13 +87,13 @@ func CreateBucket(w http.ResponseWriter, r *http.Request) () {
 	})))
 
     _, err := svc.CreateBucket(&s3.CreateBucketInput{
-        Bucket: name,
+        Bucket: aws.String(name),
     })
     // snippet-end:[s3.go.create_bucket.call]
 
     // snippet-start:[s3.go.create_bucket.wait]
     err = svc.WaitUntilBucketExists(&s3.HeadBucketInput{
-        Bucket: name,
+        Bucket: aws.String(name),
     })
     // snippet-end:[s3.go.create_bucket.wait]
 
