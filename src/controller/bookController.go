@@ -102,7 +102,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusCreated)
 	_, err3 := svc.PutObject(&s3.PutObjectInput{
-		Body: b,
+		Body: br,
 		Bucket: aws.String(BUCKET_NAME),
 		Key: aws.String("book_"+name+".json"),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
