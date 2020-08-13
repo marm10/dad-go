@@ -14,6 +14,7 @@ import (
 	b "ufc.com/deti/go-dad/src/model"	
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
@@ -108,7 +109,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	br := bytes.NewReader(b)
 
 	w.WriteHeader(http.StatusCreated)
-	_, err2 := ss3sessionvc.PutObject(&s3.PutObjectInput{
+	_, err2 := ss3session.PutObject(&s3.PutObjectInput{
 		Body: br,
 		Bucket: aws.String(bucket_name),
 		Key: aws.String(folderName+"book.json"),
