@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	BUCKET_NAME = "book-covers"
+	BUCKET_NAME = "book-covers-dad"
 	REGION = "us-east-2"
 )
 
@@ -86,7 +86,7 @@ func CreateBucket(w http.ResponseWriter, r *http.Request) () {
 	})))
 
     _, err := svc.CreateBucket(&s3.CreateBucketInput{
-		Bucket: aws.String(name),
+		Bucket: aws.String(BUCKET_NAME),
 		CreateBucketConfiguration: &s3.CreateBucketConfiguration{
 			LocationConstraint: aws.String(REGION),
 		},
