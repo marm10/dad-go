@@ -67,7 +67,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	})))
 
 	_, err1 := svc.PutObject(&s3.PutObjectInput{
-		Body: file,
+		Body: "book_"+name+"/"+file,
 		Bucket: aws.String(BUCKET_NAME),
 		Key: aws.String(fileName),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
@@ -104,7 +104,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	_, err2 := svc.PutObject(&s3.PutObjectInput{
 		Body: br,
 		Bucket: aws.String(BUCKET_NAME),
-		Key: aws.String("book_"+name+".json"),
+		Key: aws.String("book_"+name+"/book.json"),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
 	})
 
