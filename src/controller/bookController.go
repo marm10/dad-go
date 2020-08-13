@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"os"
 	"strings"
+	"bytes"
 
 	"github.com/gorilla/mux"
 	h "ufc.com/deti/go-dad/src/handlerException"
@@ -96,6 +97,9 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	bookCreated := b.Store(book)
 
 	b, err2 := json.Marshal(bookCreated)
+
+	br := bytes.NewReader(b)
+
 	w.WriteHeader(http.StatusCreated)
 	_, err3 := svc.PutObject(&s3.PutObjectInput{
 		Body: b,
