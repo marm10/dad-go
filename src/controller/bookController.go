@@ -87,7 +87,7 @@ func CreateBucket(w http.ResponseWriter, r *http.Request) () {
     _, err := svc.CreateBucket(&s3.CreateBucketInput{
 		Bucket: aws.String(BUCKET_NAME),
 		CreateBucketConfiguration: &s3.CreateBucketConfiguration{
-			LocationConstraint: aws.String(REGION)
+			LocationConstraint: aws.String(REGION),
 		},
     })
     // snippet-end:[s3.go.create_bucket.call]
