@@ -85,7 +85,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	year := r.FormValue("data_lancamento")
 	priceAttr := r.FormValue("preco")
 
-	price := strconv.ParseFloat(priceAttr, 64)
+	price, _ := strconv.ParseFloat(priceAttr, 64)
 	authors := strings.Split(authorsAttr, ",")
 
 	book.Name = name
