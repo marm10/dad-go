@@ -94,9 +94,11 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	book.Preco = price
 
 	bookCreated := b.Store(book)
+
+	b, err2 := json.Marshal(bookCreated)
 	w.WriteHeader(http.StatusCreated)
-	_, err2 := svc.PutObject(&s3.PutObjectInput{
-		Body: json.NewEncoder(w).Encode(bookCreated),
+	_, err3 := svc.PutObject(&s3.PutObjectInput{
+		Body: b,
 		Bucket: aws.String(BUCKET_NAME),
 		Key: aws.String("book_"+name+".json"),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
