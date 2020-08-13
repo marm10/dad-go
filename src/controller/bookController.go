@@ -82,9 +82,9 @@ func CreateBucket(w http.ResponseWriter, r *http.Request) () {
 	name := att["name"]
 
 	// snippet-start:[s3.go.create_bucket.call]
-    svc := s3.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
+    svc := s3.New(session.Must(session.NewSessionWithOptions(session.Options{
+        SharedConfigState: session.SharedConfigEnable,
+    })))
 
     _, err := svc.CreateBucket(&s3.CreateBucketInput{
         Bucket: aws.String(name),
