@@ -91,9 +91,6 @@ func CreateBucket(w http.ResponseWriter, r *http.Request) () {
     // snippet-end:[s3.go.create_bucket.call]
 
     // snippet-start:[s3.go.create_bucket.wait]
-    err = svc.WaitUntilBucketExists(&s3.HeadBucketInput{
-        Bucket: aws.String(BUCKET_NAME),
-	})
 	
 	if err != nil {
 		h.Handler(w, r, http.StatusBadRequest, err.Error())
