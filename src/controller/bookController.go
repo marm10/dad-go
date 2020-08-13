@@ -68,6 +68,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	authorsAttr := r.FormValue("autores")
 	year := r.FormValue("data_lancamento")
 	priceAttr := r.FormValue("preco")
+	bucket_name := r.FormValue("nome_bucket")
 
 	price, _ := strconv.ParseFloat(priceAttr, 64)
 	authors := strings.Split(authorsAttr, ",")
@@ -88,7 +89,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 
 	_, err1 := svc.PutObject(&s3.PutObjectInput{
 		Body: file,
-		Bucket: aws.String(BUCKET_NAME),
+		Bucket: aws.String(bucket_name),
 		Key: aws.String(folderName+fileName),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
 	})
@@ -106,7 +107,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	_, err2 := svc.PutObject(&s3.PutObjectInput{
 		Body: br,
-		Bucket: aws.String(BUCKET_NAME),
+		Bucket: aws.String(bucket_name),
 		Key: aws.String(folderName+"book.json"),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
 	})
