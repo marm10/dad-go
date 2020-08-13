@@ -85,7 +85,7 @@ func UploadObject(File f, string filename) {
 		Body: f,
 		Bucket: aws.String(BUCKET_NAME),
 		Key: aws.String(filename),
-		ACL: aws.String(s3.BucketCannedACLPublicRead)
+		ACL: aws.String(s3.BucketCannedACLPublicRead),
 	})
 	
 	if err != nil {
