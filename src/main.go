@@ -7,7 +7,7 @@ import (
 
 	"github.com/rs/cors"
 
-	r "ufc.com/deti/go-dad/src/routes"
+	r "ufc.com/deti/go-dad/src/routes"	
 )
 
 func main() {
