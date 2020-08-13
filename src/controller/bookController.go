@@ -64,14 +64,14 @@ func Store(w http.ResponseWriter, r *http.Request) {
 		Region: aws.String(REGION),
 	})))
 
-	_, err := svc.PutObject(&s3.PutObjectInput{
+	_, err1 := svc.PutObject(&s3.PutObjectInput{
 		Body: file,
 		Bucket: aws.String(BUCKET_NAME),
 		Key: aws.String(fileName),
 		ACL: aws.String(s3.BucketCannedACLPublicRead),
 	})
 	
-	if err != nil {
+	if err1 != nil {
 		panic(err)
 	}
 	
@@ -84,7 +84,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	year := r.FormValue("data_lancamento")
 	priceAttr := r.FormValue("preco")
 
-	price =: strconv.ParseFloat(priceAttr, 64)
+	price := strconv.ParseFloat(priceAttr, 64)
 	authors := strings.Split(authorsAttr, ",")
 
 	book.Name = name
