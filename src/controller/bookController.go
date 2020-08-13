@@ -62,22 +62,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
         panic(err)
 	}
 
-	svc := s3.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-
-	_, err1 := svc.PutObject(&s3.PutObjectInput{
-		Body: "book_"+name+"/"+file,
-		Bucket: aws.String(BUCKET_NAME),
-		Key: aws.String(fileName),
-		ACL: aws.String(s3.BucketCannedACLPublicRead),
-	})
 	
-	if err1 != nil {
-		panic(err1)
-	}
-	
-	defer f.Close()
 
 	w.Header().Set("Content-Type", "application/json")
 	var book b.Book
@@ -95,6 +80,23 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	book.Preco = price
 
 	bookCreated := b.Store(book)
+
+	svc := s3.New(session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(REGION),
+	})))
+
+	_, err1 := svc.PutObject(&s3.PutObjectInput{
+		Body: "book_"+name+"/"+file,
+		Bucket: aws.String(BUCKET_NAME),
+		Key: aws.String(fileName),
+		ACL: aws.String(s3.BucketCannedACLPublicRead),
+	})
+	
+	if err1 != nil {
+		panic(err1)
+	}
+	
+	defer f.Close()
 
 	b, _ := json.Marshal(bookCreated)
 
