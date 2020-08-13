@@ -49,8 +49,8 @@ func GetOne(w http.ResponseWriter, r *http.Request) {
 
 func Store(w http.ResponseWriter, r *http.Request) {
 
-	file, handler, err := r.FormFile("cover")
-	fileName := r.FormValue("cover_name")
+	file, handler, err := r.FormFile("capa")
+	fileName := r.FormValue("nome_capa")
     if err != nil {
         panic(err)
 	}

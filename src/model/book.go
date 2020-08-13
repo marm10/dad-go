@@ -10,7 +10,7 @@ type Book struct {
 	Year    string   `json:"data_lancamento"`
 	Preco   float64  `json:"preco"`
 	Id      int      `json:"id"`
-	Cover   string   `json:"cover_name"`
+	Cover   string   `json:"nome_capa"`
 }
 
 type Books []Book
