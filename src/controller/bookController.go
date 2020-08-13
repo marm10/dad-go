@@ -46,17 +46,51 @@ func GetOne(w http.ResponseWriter, r *http.Request) {
 
 func Store(w http.ResponseWriter, r *http.Request) {
 
+	file, handler, err := r.FormFile("file")
+	fileName := r.FormValue("file_name")
+    if err != nil {
+        panic(err)
+	}
+	
+	defer file.Close()
+
+	f, err := os.OpenFile(handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+    if err != nil {
+        panic(err)
+	}
+	
+	defer f.Close()
+
 	w.Header().Set("Content-Type", "application/json")
 	var book b.Book
-	decoder := json.NewDecoder(r.Body)
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&book); err != nil {
-		h.Handler(w, r, http.StatusBadRequest, err.Error())
-		return
-	}
+	book.Name = r.FormValue("nome")
+	book.Authors = r.FormValue("autores")
+	book.Year = r.FormValue("data_lancamento")
+	book.Preco = r.FormValue("preco")
+
+	UploadObject(file, filename)
+
 	bookCreated := b.Store(book)
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(bookCreated)
+
+}
+
+func UploadObject(File f, string filename) {
+	svc := s3.New(session.Must(session.NewSession(&aws.Config{
+		Region: aws.String(REGION),
+	})))
+
+	_, err := svc.PutObject(&s3.PutObjectInput{
+		Body: f,
+		Bucket: aws.String(BUCKET_NAME),
+		Key: aws.String(filename),
+		ACL: aws.String(s3.BucketCannedACLPublicRead)
+	})
+	
+	if err != nil {
+		panic(err)
+	}
 
 }
 
