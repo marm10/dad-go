@@ -45,8 +45,9 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	var books []b.Book
 
 	for i, s := range contents {
+		var book b.Book
+
 		if strings.Contains(aws.StringValue(s.Key), ".json") {
-			decoder.Decode(&book)
 			object := GetObject(aws.StringValue(s.Key), bucketName)
 			readarr := bytes.NewReader(object)
 			decoder := json.NewDecoder(readarr)
