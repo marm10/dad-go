@@ -145,7 +145,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 func init() {
 	if s3session == nil {
-		s3session := s3.New(session.Must(session.NewSession(&aws.Config{
+		s3session = s3.New(session.Must(session.NewSession(&aws.Config{
 			Region: aws.String(REGION),
 		})))
 	}	
