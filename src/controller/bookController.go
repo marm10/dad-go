@@ -39,7 +39,19 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("bucketname")
 	fmt.Println(bucketName)
 
-	books := listObjects(bucketName)
+	result := listObjects(bucketName)
+	contents := result.Contents
+
+	var books []Book
+
+	for i, s := range contents {
+		if strings.Contains(s.Key, ".json") {
+			object := GetObject(s.Key, bucketName)
+			book := bytes.NewReader(object)
+			books = append(books, book)
+		}
+	}
+
 	if err := json.NewEncoder(w).Encode(&books); err != nil {
 		h.Handler(w, r, http.StatusInternalServerError, err.Error())
 	}
