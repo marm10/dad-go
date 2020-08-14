@@ -36,6 +36,9 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	att := mux.Vars(r)
 	bucketName := att["bucket_name"]
 
+	fmt.Println("bucketname")
+	fmt.Println(bucketName)
+
 	books := listObjects(bucketName)
 	if err := json.NewEncoder(w).Encode(&books); err != nil {
 		h.Handler(w, r, http.StatusInternalServerError, err.Error())
