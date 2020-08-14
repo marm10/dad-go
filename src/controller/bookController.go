@@ -34,7 +34,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	att := mux.Vars(r)
-	buckerName := att["bucket_name"]
+	bucketName := att["bucket_name"]
 
 	books := listObjects(bucketName)
 	if err := json.NewEncoder(w).Encode(&books); err != nil {
@@ -176,7 +176,7 @@ func CreateBucket(bucket_name string) () {
 
 func listObjects(bucketName string) (resp *s3.ListObjectsV2Output) {
 	resp, err := s3session.ListObjectsV2(&s3.ListObjectsV2Input{
-		Bucket: aws.String(bucket_bucketNamename),
+		Bucket: aws.String(bucketName),
 	})
 
 	if err != nil {
@@ -186,7 +186,7 @@ func listObjects(bucketName string) (resp *s3.ListObjectsV2Output) {
 	return resp
 } 
 
-func GetObject(filename string, bucketName string) (resp []byte){
+func GetObject(fileName string, bucketName string) (obj []byte){
 	resp, err := s3session.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key: aws.String(fileName),
@@ -196,7 +196,7 @@ func GetObject(filename string, bucketName string) (resp []byte){
 		panic(err)
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	obj, err := ioutil.ReadAll(resp.Body)
 
-	return body
+	return obj
 }
