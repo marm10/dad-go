@@ -12,8 +12,7 @@ import (
 
 	"github.com/gorilla/mux"
 	h "ufc.com/deti/go-dad/src/handlerException"
-	b "ufc.com/deti/go-dad/src/model"	
-	m "ufc.com/deti/go-dad/src/main"	
+	b "ufc.com/deti/go-dad/src/model"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
