@@ -196,7 +196,7 @@ func GetObject(fileName string, bucketName string) (obj []byte){
 		panic(err)
 	}
 
-	obj, err := ioutil.ReadAll(resp.Body)
+	obj, _ := ioutil.ReadAll(resp.Body)
 
 	return obj
 }
