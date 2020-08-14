@@ -42,7 +42,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	result := listObjects(bucketName)
 	contents := result.Contents
 
-	var books []Book
+	var books []b.Book
 
 	for i, s := range contents {
 		if strings.Contains(aws.String(s.Key), ".json") {
