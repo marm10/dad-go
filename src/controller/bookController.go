@@ -8,10 +8,12 @@ import (
 	"strings"
 	"bytes"
 	"fmt"
+	"io/ioutil"
 
 	"github.com/gorilla/mux"
 	h "ufc.com/deti/go-dad/src/handlerException"
 	b "ufc.com/deti/go-dad/src/model"	
+	m "ufc.com/deti/go-dad/src/main"	
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -24,10 +26,18 @@ const (
 	REGION = "us-east-2"
 )
 
+var (
+	s3session *s3.S3
+)
+
 func GetAll(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	books := b.GetAll()
+
+	att := mux.Vars(r)
+	buckerName := att["bucket_name"]
+
+	books := listObjects(bucketName)
 	if err := json.NewEncoder(w).Encode(&books); err != nil {
 		h.Handler(w, r, http.StatusInternalServerError, err.Error())
 	}
@@ -72,11 +82,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	priceAttr := r.FormValue("preco")
 	bucket_name := r.FormValue("nome_bucket")
 
-	s3session := s3.New(session.Must(session.NewSession(&aws.Config{
-		Region: aws.String(REGION),
-	})))
-
-	CreateBucket(bucket_name, s3session)
+	CreateBucket(bucket_name)
 
 	price, _ := strconv.ParseFloat(priceAttr, 64)
 	authors := strings.Split(authorsAttr, ",")
@@ -138,7 +144,15 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
-func CreateBucket(bucket_name string, s3session *s3.S3) () {
+func init() {
+	if s3session == nil {
+		s3session := s3.New(session.Must(session.NewSession(&aws.Config{
+			Region: aws.String(REGION),
+		})))
+	}	
+}
+
+func CreateBucket(bucket_name string) () {
     _, err := s3session.CreateBucket(&s3.CreateBucketInput{
 		Bucket: aws.String(bucket_name),
 		CreateBucketConfiguration: &s3.CreateBucketConfiguration{
@@ -158,6 +172,32 @@ func CreateBucket(bucket_name string, s3session *s3.S3) () {
 				panic(err)	
 			}
 		}
+	}	
+}
+
+func listObjects(bucketName string) (resp *s3.ListObjectsV2Output) {
+	resp, err := s3session.ListObjectsV2(&s3.ListObjectsV2Input{
+		Bucket: aws.String(bucket_bucketNamename),
+	})
+
+	if err != nil {
+		panic(err)
 	}
-    // snippet-end:[s3.go.create_bucket.wait]	
+
+	return resp
+} 
+
+func GetObject(filename string, bucketName string) (resp []byte){
+	resp, err := s3session.GetObject(&s3.GetObjectInput{
+		Bucket: aws.String(bucketName),
+		Key: aws.String(fileName),
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+
+	return body
 }
