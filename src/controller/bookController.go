@@ -45,6 +45,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	var books []b.Book
 
 	for i, s := range contents {
+		fmt.Println(i)
 		var book b.Book
 
 		if strings.Contains(aws.StringValue(s.Key), ".json") {
