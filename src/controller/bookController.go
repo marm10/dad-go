@@ -96,7 +96,6 @@ func GetBookById(id int, bucketName string) ( returnBook b.Book, err error)  {
 	result, _ := listObjects(bucketName)
 	contents := result.Contents
 
-	var books []b.Book
 	var book b.Book
 
 	for i, s := range contents {
@@ -107,7 +106,7 @@ func GetBookById(id int, bucketName string) ( returnBook b.Book, err error)  {
 			readarr := bytes.NewReader(object)
 			decoder := json.NewDecoder(readarr)
 			decoder.DisallowUnknownFields()
-			err := decoder.Decode(&book)
+			err = decoder.Decode(&book)
 
 			if book.Id == id {
 				returnBook = book
@@ -212,7 +211,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := DeleteObject(bucketName, returnBook.Name)
+	_, err := DeleteObject(bucketName, returnBook.Name)
 	
 	if err != nil {
 		h.Handler(w, r, http.StatusNotFound, err.Error())
