@@ -39,7 +39,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("bucketname")
 	fmt.Println(bucketName)
 
-	result := listObjects(bucketName)
+	result, _ := listObjects(bucketName)
 	contents := result.Contents
 
 	var books []b.Book
@@ -49,7 +49,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 		var book b.Book
 
 		if strings.Contains(aws.StringValue(s.Key), ".json") {
-			object := GetObject(aws.StringValue(s.Key), bucketName)
+			object, _ := GetObject(aws.StringValue(s.Key), bucketName)
 			readarr := bytes.NewReader(object)
 			decoder := json.NewDecoder(readarr)
 			decoder.DisallowUnknownFields()
@@ -76,18 +76,18 @@ func GetOne(w http.ResponseWriter, r *http.Request) {
 	idAtt := att["id"]
 	id, _ := strconv.Atoi(idAtt)
 	
-	returnBook := GetBookById(id)
+	returnBook := GetBookById(id, bucketName, w, r)
 	
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(&returnBook)
 
 }
 
-func GetBookById(id int) b.Book  {
+func GetBookById(id int, bucketName string, w http.ResponseWriter, r *http.Request) b.Book  {
 	fmt.Println("bucketname")
 	fmt.Println(bucketName)
 
-	result := listObjects(bucketName)
+	result, _ := listObjects(bucketName)
 	contents := result.Contents
 
 	var books []b.Book
@@ -201,8 +201,9 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	att := mux.Vars(r)
 	idAtt := att["id"]
 	id, _ := strconv.Atoi(idAtt)
+	bucketName := att["bucket_name"]
 
-	returnBook := GetBookById(id)
+	returnBook := GetBookById(id, bucketName, w, r)
 
 	err, resp := DeleteObject(returnBook.Name)
 	
@@ -245,7 +246,7 @@ func CreateBucket(bucket_name string) (err error) {
 }
 
 func listObjects(bucketName string) (resp *s3.ListObjectsV2Output, err error) {
-	resp, err := s3session.ListObjectsV2(&s3.ListObjectsV2Input{
+	return s3session.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
 	})
 } 
@@ -264,7 +265,7 @@ func GetObject(fileName string, bucketName string) (obj []byte, err error){
 }
 
 func DeleteObject(bucketName string, fileName string) (resp *s3.DeleteObjectOutput, err error) {
-	resp, err := s3session.DeleteObject(&s3.DeleteObjectInput{
+	return s3session.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bucketName),
 		Key: aws.String(fileName),
 	})
