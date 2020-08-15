@@ -230,6 +230,21 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusAccepted)
 }
 
+func DoDeleteBucket(w http.ResponseWriter, r *http.Request)  {
+	w.Header().Set("Content-Type", "application/json")
+	att := mux.Vars(r)
+	bucketName := att["bucket_name"]
+
+	_, err := DeleteBucket(bucketName)
+
+	if err != nil {
+		h.Handler(w, r, http.StatusNotFound, err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusAccepted)
+}
+
 func init() {
 	if s3session == nil {
 		s3session = s3.New(session.Must(session.NewSession(&aws.Config{
@@ -295,5 +310,11 @@ func DeleteObject(bucketName string, fileName string) (resp *s3.DeleteObjectOutp
 	return s3session.DeleteObject(&s3.DeleteObjectInput{
 		Bucket: aws.String(bucketName),
 		Key: aws.String(fileName),
+	})
+}
+
+func DeleteBucket(bucketName string) (resp *s3.DeleteBucketOutput, err error) {
+	return s3session.DeleteBucket(&s3.DeleteBucketInput{
+		Bucket: aws.String(bucketName),
 	})
 }

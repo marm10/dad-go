@@ -11,5 +11,6 @@ func NewRouter() *mux.Router {
 	router.HandleFunc("/books", c.Store).Methods("POST")
 	router.HandleFunc("/books/{bucket_name}/{id}", c.GetOne).Methods("GET")
 	router.HandleFunc("/books/{bucket_name}/{id}", c.Delete).Methods("DELETE")
+	router.HandleFunc("/books/{bucket_name}", c.DoDeleteBucket).Methods("DELETE")
 	return router
 }
