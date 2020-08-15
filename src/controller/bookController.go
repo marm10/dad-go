@@ -39,7 +39,7 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("bucketname")
 	fmt.Println(bucketName)
 
-	result, _ := listObjects(bucketName)
+	result, _ := ListObjects(bucketName)
 	contents := result.Contents
 
 	var books []b.Book
@@ -93,7 +93,7 @@ func GetBookById(id int, bucketName string) ( returnBook b.Book, err error)  {
 	fmt.Println("bucketname")
 	fmt.Println(bucketName)
 
-	result, _ := listObjects(bucketName)
+	result, _ := ListObjects(bucketName)
 	contents := result.Contents
 
 	var book b.Book
@@ -151,7 +151,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	book.Preco = price
 	book.Cover = fileName;
 
-	objects, err := listObjects(bucket_name)
+	objects, err := ListObjects(bucket_name)
 
 	if err != nil {
 		h.Handler(w, r, http.StatusNotFound, err.Error())
@@ -214,7 +214,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	folderName := "book_"+returnBook.Name+"/";
 
 
-	result, _ := listObjectsInFolder(bucketName, folderName)
+	result, _ := ListObjectsInFolder(bucketName, folderName)
 	contents := result.Contents
 
 	for i, s := range contents {
@@ -278,13 +278,13 @@ func CreateBucket(bucket_name string) (err error) {
 	return err
 }
 
-func listObjects(bucketName string) (resp *s3.ListObjectsV2Output, err error) {
+func ListObjects(bucketName string) (resp *s3.ListObjectsV2Output, err error) {
 	return s3session.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
 	})
 } 
 
-func listObjectsInFolder(bucketName string, folderName string) (resp *s3.ListObjectsV2Output, err error) {
+func ListObjectsInFolder(bucketName string, folderName string) (resp *s3.ListObjectsV2Output, err error) {
 	return s3session.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
 		Prefix: aws.String(folderName),
