@@ -212,7 +212,6 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	folderName := "book_"+returnBook.Name+"/";
-	fileName := folderName+"book.json";
 
 	_, err1 := DeleteObject(bucketName, folderName)
 	
