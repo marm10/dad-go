@@ -217,9 +217,8 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	result, _ := listObjectsInFolder(bucketName, folderName)
 	contents := result.Contents
 
-	var book b.Book
-
 	for i, s := range contents {
+		fmt.Println(i)
 		_, err1 := DeleteObject(bucketName, aws.StringValue(s.Key))
 	
 		if err1 != nil {
