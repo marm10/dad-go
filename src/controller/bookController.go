@@ -220,7 +220,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	var book b.Book
 
 	for i, s := range contents {
-		_, err1 := DeleteObject(bucketName, s.Key)
+		_, err1 := DeleteObject(bucketName, aws.StringValue(s.Key))
 	
 		if err1 != nil {
 			h.Handler(w, r, http.StatusNotFound, err1.Error())
