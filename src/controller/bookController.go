@@ -70,17 +70,50 @@ func GetAll(w http.ResponseWriter, r *http.Request) {
 func GetOne(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
+
 	att := mux.Vars(r)
+	bucketName := att["bucket_name"]
 	idAtt := att["id"]
 	id, _ := strconv.Atoi(idAtt)
-	book, err := b.GetOne(id)
-	if err != nil {
-		h.Handler(w, r, http.StatusNotFound, err.Error())
-		return
-	}
+	
+	returnBook := GetBookById(id)
+	
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(&book)
+	json.NewEncoder(w).Encode(&returnBook)
 
+}
+
+func GetBookById(id int) b.Book  {
+	fmt.Println("bucketname")
+	fmt.Println(bucketName)
+
+	result := listObjects(bucketName)
+	contents := result.Contents
+
+	var books []b.Book
+	var book b.Book
+	var returnBook b.Book
+
+	for i, s := range contents {
+		fmt.Println(i)
+
+		if strings.Contains(aws.StringValue(s.Key), ".json") {
+			object := GetObject(aws.StringValue(s.Key), bucketName)
+			readarr := bytes.NewReader(object)
+			decoder := json.NewDecoder(readarr)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&book); err != nil {
+				h.Handler(w, r, http.StatusBadRequest, err.Error())
+				return
+			}
+
+			if book.Id == id {
+				returnBook = book
+			}
+		}
+	}
+
+	return returnBook
 }
 
 func Store(w http.ResponseWriter, r *http.Request) {
@@ -117,7 +150,15 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	book.Preco = price
 	book.Cover = fileName;
 
-	bookCreated := b.Store(book)
+	objects, err := listObjects(bucket_name)
+
+	if err != nil {
+		h.Handler(w, r, http.StatusNotFound, err.Error())
+		return
+	}
+
+	contents := result.Contents
+	book.Id = len(contents)
 
 	folderName := "book_"+name+"/";
 
@@ -129,12 +170,13 @@ func Store(w http.ResponseWriter, r *http.Request) {
 	})
 	
 	if err1 != nil {
-		panic(err1)
+		h.Handler(w, r, http.StatusNotFound, err1.Error())
+		return
 	}
 	
 	defer f.Close()
 
-	b, _ := json.Marshal(bookCreated)
+	b, _ := json.Marshal(&book)
 
 	br := bytes.NewReader(b)
 
@@ -150,8 +192,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 		panic(err2)
 	}
 
-	json.NewEncoder(w).Encode(bookCreated)
-
+	json.NewEncoder(w).Encode(&book)
 }
 
 func Delete(w http.ResponseWriter, r *http.Request) {
@@ -160,7 +201,11 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	att := mux.Vars(r)
 	idAtt := att["id"]
 	id, _ := strconv.Atoi(idAtt)
-	err := b.Delete(id)
+
+	returnBook := GetBookById(id)
+
+	err, resp := DeleteObject(returnBook.Name)
+	
 	if err != nil {
 		h.Handler(w, r, http.StatusNotFound, err.Error())
 		return
@@ -176,56 +221,51 @@ func init() {
 	}	
 }
 
-func CreateBucket(bucket_name string) () {
-    _, err := s3session.CreateBucket(&s3.CreateBucketInput{
+func CreateBucket(bucket_name string) (err error) {
+    _, err0 := s3session.CreateBucket(&s3.CreateBucketInput{
 		Bucket: aws.String(bucket_name),
 		CreateBucketConfiguration: &s3.CreateBucketConfiguration{
 			LocationConstraint: aws.String(REGION),
 		},
-    })
+	})
 	
-	if err != nil {
-		if aerr, ok := err.(awserr.Error); ok {
+	if err0 != nil {
+		if aerr, ok := err0.(awserr.Error); ok {
 			switch aerr.Code() {
 			case s3.ErrCodeBucketAlreadyExists:
 				fmt.Println("Bucket name already exists!")
-				panic(err)
+				err = err0
 			case s3.ErrCodeBucketAlreadyOwnedByYou:
 				fmt.Println("Bucket name exists and is owned by you!")
 			default:
-				panic(err)	
+				err = err0
 			}
 		}
-	}	
+	}
 }
 
-func listObjects(bucketName string) (resp *s3.ListObjectsV2Output) {
+func listObjects(bucketName string) (resp *s3.ListObjectsV2Output, err error) {
 	resp, err := s3session.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
 	})
-
-	if err != nil {
-		panic(err)
-	}
-
-	return resp
 } 
 
-func GetObject(fileName string, bucketName string) (obj []byte){
+func GetObject(fileName string, bucketName string) (obj []byte, err error){
 	resp, err := s3session.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(bucketName),
 		Key: aws.String(fileName),
 	})
-
-	if err != nil {
-		panic(err)
-	}
 
 	obj, err1 := ioutil.ReadAll(resp.Body)
 
 	if err1 != nil {
 		panic(err1)
 	}
+}
 
-	return obj
+func DeleteObject(bucketName string, fileName string) (resp *s3.DeleteObjectOutput, err error) {
+	resp, err := s3session.DeleteObject(&s3.DeleteObjectInput{
+		Bucket: aws.String(bucketName),
+		Key: aws.String(fileName),
+	})
 }
