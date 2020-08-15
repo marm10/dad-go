@@ -211,10 +211,10 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err := DeleteObject(bucketName, returnBook.Name)
+	_, err1 := DeleteObject(bucketName, returnBook.Name)
 	
-	if err != nil {
-		h.Handler(w, r, http.StatusNotFound, err.Error())
+	if err1 != nil {
+		h.Handler(w, r, http.StatusNotFound, err1.Error())
 		return
 	}
 	w.WriteHeader(http.StatusAccepted)
