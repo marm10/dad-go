@@ -214,7 +214,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	folderName := "book_"+returnBook.Name+"/";
 	fileName := folderName+"book.json";
 
-	_, err1 := DeleteObject(bucketName, fileName)
+	_, err1 := DeleteObject(bucketName, folderName)
 	
 	if err1 != nil {
 		h.Handler(w, r, http.StatusNotFound, err1.Error())
