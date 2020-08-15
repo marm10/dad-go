@@ -76,14 +76,20 @@ func GetOne(w http.ResponseWriter, r *http.Request) {
 	idAtt := att["id"]
 	id, _ := strconv.Atoi(idAtt)
 	
-	returnBook := GetBookById(id, bucketName, w, r)
+	returnBook, err := GetBookById(id, bucketName)
+
+	if err != nil {
+		h.Handler(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+	
 	
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(&returnBook)
 
 }
 
-func GetBookById(id int, bucketName string, w http.ResponseWriter, r *http.Request) b.Book  {
+func GetBookById(id int, bucketName string) ( returnBook b.Book, err error)  {
 	fmt.Println("bucketname")
 	fmt.Println(bucketName)
 
@@ -92,20 +98,16 @@ func GetBookById(id int, bucketName string, w http.ResponseWriter, r *http.Reque
 
 	var books []b.Book
 	var book b.Book
-	var returnBook b.Book
 
 	for i, s := range contents {
 		fmt.Println(i)
 
 		if strings.Contains(aws.StringValue(s.Key), ".json") {
-			object := GetObject(aws.StringValue(s.Key), bucketName)
+			object, _ := GetObject(aws.StringValue(s.Key), bucketName)
 			readarr := bytes.NewReader(object)
 			decoder := json.NewDecoder(readarr)
 			decoder.DisallowUnknownFields()
-			if err := decoder.Decode(&book); err != nil {
-				h.Handler(w, r, http.StatusBadRequest, err.Error())
-				return
-			}
+			err := decoder.Decode(&book)
 
 			if book.Id == id {
 				returnBook = book
@@ -113,7 +115,7 @@ func GetBookById(id int, bucketName string, w http.ResponseWriter, r *http.Reque
 		}
 	}
 
-	return returnBook
+	return returnBook, err
 }
 
 func Store(w http.ResponseWriter, r *http.Request) {
@@ -203,9 +205,14 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	id, _ := strconv.Atoi(idAtt)
 	bucketName := att["bucket_name"]
 
-	returnBook := GetBookById(id, bucketName, w, r)
+	returnBook, err := GetBookById(id, bucketName)
 
-	err, resp := DeleteObject(returnBook.Name)
+	if err != nil {
+		h.Handler(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	resp, err := DeleteObject(returnBook.Name)
 	
 	if err != nil {
 		h.Handler(w, r, http.StatusNotFound, err.Error())
