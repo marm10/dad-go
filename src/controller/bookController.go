@@ -213,12 +213,21 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 
 	folderName := "book_"+returnBook.Name+"/";
 
-	_, err1 := DeleteObject(bucketName, folderName)
+
+	result, _ := listObjectsInFolder(bucketName, folderName)
+	contents := result.Contents
+
+	var book b.Book
+
+	for i, s := range contents {
+		_, err1 := DeleteObject(bucketName, s.Key)
 	
-	if err1 != nil {
-		h.Handler(w, r, http.StatusNotFound, err1.Error())
-		return
+		if err1 != nil {
+			h.Handler(w, r, http.StatusNotFound, err1.Error())
+			return
+		}
 	}
+
 	w.WriteHeader(http.StatusAccepted)
 }
 
@@ -258,6 +267,13 @@ func CreateBucket(bucket_name string) (err error) {
 func listObjects(bucketName string) (resp *s3.ListObjectsV2Output, err error) {
 	return s3session.ListObjectsV2(&s3.ListObjectsV2Input{
 		Bucket: aws.String(bucketName),
+	})
+} 
+
+func listObjectsInFolder(bucketName string, folderName string) (resp *s3.ListObjectsV2Output, err error) {
+	return s3session.ListObjectsV2(&s3.ListObjectsV2Input{
+		Bucket: aws.String(bucketName),
+		Prefix: aws.String(folderName),
 	})
 } 
 
