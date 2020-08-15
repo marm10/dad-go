@@ -159,7 +159,7 @@ func Store(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	contents := result.Contents
+	contents := objects.Contents
 	book.Id = len(contents)
 
 	folderName := "book_"+name+"/";
@@ -212,7 +212,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	resp, err := DeleteObject(returnBook.Name)
+	resp, err := DeleteObject(bucketName, returnBook.Name)
 	
 	if err != nil {
 		h.Handler(w, r, http.StatusNotFound, err.Error())
@@ -250,6 +250,8 @@ func CreateBucket(bucket_name string) (err error) {
 			}
 		}
 	}
+
+	return err
 }
 
 func listObjects(bucketName string) (resp *s3.ListObjectsV2Output, err error) {
@@ -269,6 +271,8 @@ func GetObject(fileName string, bucketName string) (obj []byte, err error){
 	if err1 != nil {
 		panic(err1)
 	}
+
+	return obj, err
 }
 
 func DeleteObject(bucketName string, fileName string) (resp *s3.DeleteObjectOutput, err error) {
